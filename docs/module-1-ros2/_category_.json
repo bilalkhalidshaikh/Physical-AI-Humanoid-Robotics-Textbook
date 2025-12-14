@@ -1,0 +1,11 @@
+{
+  "label": "Module 1: Robotic Nervous System (ROS 2)",
+  "position": 2,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Module 1: Robotic Nervous System (ROS 2)",
+    "description": "Learn how robots communicate internally using ROS 2. This module covers nodes, topics, services, actions, and real-time control patterns essential for humanoid robot development."
+  }
+}

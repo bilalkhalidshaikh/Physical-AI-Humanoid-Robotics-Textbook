@@ -1,0 +1,11 @@
+{
+  "label": "Module 4: Vision-Language-Action (VLA)",
+  "position": 5,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Module 4: Vision-Language-Action (VLA)",
+    "description": "Implement multimodal AI for natural human-robot interaction. Learn speech recognition with Whisper, LLM reasoning, and action generation from natural language."
+  }
+}

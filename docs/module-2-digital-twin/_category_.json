@@ -1,0 +1,11 @@
+{
+  "label": "Module 2: Digital Twin (Gazebo)",
+  "position": 3,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Module 2: Digital Twin (Gazebo)",
+    "description": "Create virtual replicas of physical robots using Gazebo. Learn URDF/SDF modeling, physics configuration, sensor simulation, and environment design."
+  }
+}

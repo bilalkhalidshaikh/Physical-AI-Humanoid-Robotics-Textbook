@@ -1,0 +1,11 @@
+{
+  "label": "Module 3: AI-Robot Brain (Isaac Sim)",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Module 3: AI-Robot Brain (Isaac Sim)",
+    "description": "Train intelligent robot behaviors using NVIDIA Isaac Sim. Covers reinforcement learning, domain randomization, motion policies, and sim-to-real transfer."
+  }
+}

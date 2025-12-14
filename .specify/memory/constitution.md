@@ -1,55 +1,173 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+  === SYNC IMPACT REPORT ===
+  Version change: 0.0.0 → 1.0.0 (MAJOR - initial constitution creation)
+
+  Modified principles: N/A (initial creation)
+  Added sections:
+    - Core Principles (3 principles as specified by user)
+    - Technology Stack (project-specific)
+    - Module Architecture (4 modules)
+    - Governance
+  Removed sections: N/A (initial creation)
+
+  Templates requiring updates:
+    - .specify/templates/plan-template.md ✅ (compatible - no changes needed)
+    - .specify/templates/spec-template.md ✅ (compatible - no changes needed)
+    - .specify/templates/tasks-template.md ✅ (compatible - no changes needed)
+
+  Follow-up TODOs: None
+-->
+
+# Physical AI & Humanoid Robotics Textbook Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Development
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All features, chapters, and components MUST begin with a formal specification before
+implementation. This ensures traceability, clarity, and alignment across the documentation
+and chatbot components.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Non-negotiable rules:**
+- Every chapter, module, or feature MUST have a corresponding spec.md before development
+- Specifications MUST include acceptance criteria and success metrics
+- Changes to existing content MUST first update the specification
+- No code or content shall be merged without spec approval
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Rationale:** Spec-driven development ensures that the complex interplay between robotics
+concepts, simulation environments, and AI systems is properly planned and documented before
+implementation, reducing rework and maintaining consistency across the textbook.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### II. Physical-First Design
 
-### [PRINCIPLE_6_NAME]
+All explanations, examples, and implementations MUST prioritize physical world applicability
+and real-robot behavior over pure simulation or theoretical constructs.
 
+**Non-negotiable rules:**
+- Examples MUST demonstrate real-world physical constraints (torque limits, sensor noise,
+  latency)
+- Simulation content MUST include reality gap considerations and sim-to-real transfer notes
+- Code samples MUST be tested or validated against physical robot behaviors where applicable
+- Safety considerations for physical robots MUST be explicitly documented
 
-[PRINCIPLE__DESCRIPTION]
+**Rationale:** A Physical AI textbook loses value if it only works in simulation. Readers
+must understand how concepts translate to actual humanoid robots with real-world physics.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### III. Content Accuracy
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+All technical content MUST be factually accurate, up-to-date with current robotics research,
+and properly cited. Misleading or outdated information is unacceptable.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**Non-negotiable rules:**
+- Technical claims MUST be verifiable through documentation, papers, or reproducible code
+- Version-specific information MUST clearly state the version (e.g., ROS 2 Humble, Isaac Sim
+  2023.1)
+- Deprecated APIs or methods MUST be marked and alternatives provided
+- Mathematical formulations MUST be correct and consistent with standard robotics notation
+- Code examples MUST be tested and working with specified versions
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale:** Students and practitioners rely on this textbook for learning. Inaccurate
+content can lead to safety issues in physical robot applications and erode trust in the
+material.
+
+## Technology Stack
+
+The project employs the following technology stack. All implementations MUST use these
+technologies unless explicitly justified and approved.
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Documentation | Docusaurus 3 | Static site generation for textbook |
+| Hosting | GitHub Pages | Public deployment and versioning |
+| Robotics Middleware | ROS 2 | Robot communication and control |
+| Physics Simulation | Gazebo | Digital twin and simulation |
+| AI/ML Platform | NVIDIA Isaac Sim | AI-robot brain training |
+| Language Processing | Python | Primary implementation language |
+| Voice/LLM | Whisper, LLMs | Vision-Language-Action models |
+
+**Stack constraints:**
+- Python version MUST be 3.10+ for ROS 2 compatibility
+- ROS 2 distribution MUST be Humble or newer
+- Isaac Sim content MUST specify compatible NVIDIA driver versions
+- Docusaurus plugins MUST be compatible with version 3.x
+
+## Module Architecture
+
+The textbook is organized into four core modules. Each module MUST maintain clear boundaries
+and well-defined interfaces.
+
+### Module 1: Robotic Nervous System (ROS 2)
+
+**Scope:** Robot communication, sensor integration, actuator control, and middleware patterns
+using ROS 2.
+
+**Key topics:**
+- Node architecture and lifecycle management
+- Topic/Service/Action communication patterns
+- Sensor drivers and data processing
+- Real-time control considerations
+
+### Module 2: Digital Twin (Gazebo)
+
+**Scope:** Physics simulation, environment modeling, and sensor simulation for testing and
+validation.
+
+**Key topics:**
+- URDF/SDF robot modeling
+- Physics engine configuration
+- Sensor plugins and noise models
+- World and environment design
+
+### Module 3: AI-Robot Brain (Isaac Sim)
+
+**Scope:** AI training environments, reinforcement learning, and neural network deployment
+for robot intelligence.
+
+**Key topics:**
+- Domain randomization for sim-to-real
+- Reinforcement learning pipelines
+- Motion policy training
+- Perception model training
+
+### Module 4: Vision-Language-Action (VLA)
+
+**Scope:** Multimodal AI systems combining vision, language understanding, and action
+generation for intelligent robot behavior.
+
+**Key topics:**
+- Speech recognition integration (Whisper)
+- Large Language Model reasoning
+- Vision-language grounding
+- Action generation from natural language commands
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### Amendment Procedure
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+1. Propose amendment via spec document in `specs/constitution-amendment/`
+2. Obtain stakeholder review (minimum 1 reviewer)
+3. Document rationale and impact analysis
+4. Update constitution.md with new version
+5. Propagate changes to dependent templates
+6. Create PHR documenting the amendment
+
+### Versioning Policy
+
+The constitution follows semantic versioning:
+- **MAJOR:** Backward-incompatible changes to core principles or governance
+- **MINOR:** New principles, sections, or significant clarifications added
+- **PATCH:** Typo fixes, minor wording improvements, non-semantic changes
+
+### Compliance Review
+
+- All PRs MUST be checked against constitution principles before merge
+- Module content MUST align with specified technology stack
+- Complexity additions MUST be justified against simplicity goals
+- Annual review of constitution for relevance to current robotics landscape
+
+### Development Guidance
+
+For runtime development guidance and agent-specific instructions, refer to `CLAUDE.md` at
+the repository root.
+
+**Version**: 1.0.0 | **Ratified**: 2025-12-14 | **Last Amended**: 2025-12-14
