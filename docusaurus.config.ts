@@ -12,10 +12,10 @@ const config: Config = {
   },
 
   // GitHub Pages deployment configuration
-  url: 'https://your-username.github.io',
-  baseUrl: '/Physical-AI-Book/',
-  organizationName: 'your-username',
-  projectName: 'Physical-AI-Book',
+  url: 'https://bilalkhalidshaikh.github.io',
+  baseUrl: '/Physical-AI-Humanoid-Robotics-Textbook/',
+  organizationName: 'bilalkhalidshaikh',
+  projectName: 'Physical-AI-Humanoid-Robotics-Textbook',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
 
@@ -40,7 +40,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/', // Docs served from root URL
-          editUrl: 'https://github.com/your-username/Physical-AI-Book/edit/main/',
+          editUrl: 'https://github.com/bilalkhalidshaikh/Physical-AI-Book/edit/main/',
         },
         blog: false, // Disable blog
         theme: {
@@ -69,7 +69,7 @@ const config: Config = {
           label: 'Textbook',
         },
         {
-          href: 'https://github.com/your-username/Physical-AI-Book',
+          href: 'https://github.com/bilalkhalidshaikh/Physical-AI-Book',
           label: 'GitHub',
           position: 'right',
         },
@@ -121,7 +121,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/your-username/Physical-AI-Book',
+              href: 'https://github.com/bilalkhalidshaikh/Physical-AI-Book',
             },
           ],
         },
