@@ -1,0 +1,341 @@
+openapi: 3.1.0
+info:
+  title: Auth Server API
+  version: 1.0.0
+  description: |
+    Authentication and user profile management API for the Physical AI textbook.
+    Built with Hono + BetterAuth.
+
+servers:
+  - url: http://localhost:3001
+    description: Development
+  - url: https://auth.yourdomain.com
+    description: Production
+
+paths:
+  # BetterAuth handles these automatically
+  /api/auth/signup:
+    post:
+      summary: Register new user
+      description: Create a new user account with email/password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+
+  /api/auth/signin:
+    post:
+      summary: Sign in user
+      description: Authenticate with email/password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+        '401':
+          description: Invalid credentials
+
+  /api/auth/signout:
+    post:
+      summary: Sign out user
+      description: Invalidate current session
+      tags: [Authentication]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Signed out successfully
+        '401':
+          description: Not authenticated
+
+  /api/auth/session:
+    get:
+      summary: Get current session
+      description: Returns current user session if authenticated
+      tags: [Authentication]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Session data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: Not authenticated
+
+  /api/auth/callback/{provider}:
+    get:
+      summary: OAuth callback
+      description: Handles OAuth provider callback
+      tags: [Authentication]
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [github, google]
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to frontend
+
+  # Custom endpoints
+  /api/user/profile:
+    get:
+      summary: Get user profile
+      description: Returns user profile with background information
+      tags: [Profile]
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Not authenticated
+        '404':
+          description: Profile not found
+
+    post:
+      summary: Update user profile
+      description: Update background information (onboarding or settings)
+      tags: [Profile]
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid input
+        '401':
+          description: Not authenticated
+
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+
+  schemas:
+    SignupRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          example: SecureP@ss123
+        name:
+          type: string
+          example: John Doe
+
+    SigninRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    SessionResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          nullable: true
+        image:
+          type: string
+          nullable: true
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        softwareBackground:
+          type: string
+          nullable: true
+          description: User's software experience
+          example: "Python expert, familiar with ML frameworks"
+        hardwareBackground:
+          type: string
+          nullable: true
+          description: User's hardware experience
+          example: "Built Arduino projects, new to ROS"
+        preferredLanguage:
+          type: string
+          enum: [en, ur]
+          default: en
+        personalizationEnabled:
+          type: boolean
+          default: true
+        onboardingCompleted:
+          type: boolean
+          default: false
+        onboardingCompletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        softwareBackground:
+          type: string
+          maxLength: 2000
+        hardwareBackground:
+          type: string
+          maxLength: 2000
+        preferredLanguage:
+          type: string
+          enum: [en, ur]
+        personalizationEnabled:
+          type: boolean
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        database:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string

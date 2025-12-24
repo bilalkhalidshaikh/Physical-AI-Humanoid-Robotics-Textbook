@@ -1,0 +1,504 @@
+openapi: 3.1.0
+info:
+  title: RAG Backend API
+  version: 1.0.0
+  description: |
+    RAG chatbot, translation, and personalization API for the Physical AI textbook.
+    Built with Python FastAPI + OpenAI Agents SDK.
+
+servers:
+  - url: http://localhost:8000
+    description: Development
+  - url: https://api.yourdomain.com
+    description: Production
+
+paths:
+  /chat:
+    post:
+      summary: Send chat message
+      description: |
+        Send a message to the RAG chatbot. Retrieves relevant content from the
+        textbook and generates a grounded response.
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Invalid request
+        '429':
+          description: Rate limited
+        '503':
+          description: Service unavailable (Qdrant/OpenAI down)
+
+  /chat/sessions:
+    get:
+      summary: List chat sessions
+      description: Get all chat sessions for authenticated user
+      tags: [Chat]
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+
+  /chat/sessions/{session_id}:
+    get:
+      summary: Get session with messages
+      description: Retrieve a chat session with all its messages
+      tags: [Chat]
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetailResponse'
+        '404':
+          description: Session not found
+
+    delete:
+      summary: Delete chat session
+      description: Delete a chat session and all its messages
+      tags: [Chat]
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Session deleted
+        '404':
+          description: Session not found
+
+  /translate:
+    post:
+      summary: Translate content to Urdu
+      description: |
+        Translate chapter content to Urdu using GPT-4o.
+        Preserves code blocks and technical terms in English.
+        Results are cached for efficiency.
+      tags: [Translation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateRequest'
+      responses:
+        '200':
+          description: Translated content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslateResponse'
+        '400':
+          description: Invalid request
+        '429':
+          description: Rate limited
+        '504':
+          description: Translation timeout
+
+  /personalize:
+    post:
+      summary: Personalize chapter content
+      description: |
+        Rewrite chapter content based on user's background.
+        Requires authenticated user with completed profile.
+        Results are cached per user/content combination.
+      tags: [Personalization]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalizeRequest'
+      responses:
+        '200':
+          description: Personalized content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizeResponse'
+        '400':
+          description: Invalid request or profile incomplete
+        '429':
+          description: Rate limited
+        '504':
+          description: Personalization timeout
+
+  /search:
+    post:
+      summary: Search documents
+      description: |
+        Direct semantic search endpoint for testing retrieval.
+        Returns relevant document chunks from Qdrant.
+      tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: User's question or message
+          example: "What is a ROS 2 node?"
+        session_id:
+          type: string
+          format: uuid
+          description: Existing session ID to continue conversation
+        user_id:
+          type: string
+          format: uuid
+          description: User ID for chat history persistence
+        context_type:
+          type: string
+          enum: [general, selection, chapter]
+          default: general
+          description: Type of context for the query
+        context_source:
+          type: string
+          description: |
+            For 'selection': the selected text
+            For 'chapter': the file path
+        module_filter:
+          type: string
+          enum: [ros2, gazebo, isaac_sim, vla]
+          description: Filter results to specific module
+
+    ChatResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: AI-generated response
+        session_id:
+          type: string
+          format: uuid
+          description: Session ID for conversation continuity
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceReference'
+          description: Referenced textbook sources
+        timestamp:
+          type: string
+          format: date-time
+        token_usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+            completion_tokens:
+              type: integer
+            total_tokens:
+              type: integer
+
+    SourceReference:
+      type: object
+      properties:
+        file:
+          type: string
+          description: Source file path
+          example: "module-1-ros2/basics.md"
+        section:
+          type: string
+          description: Section heading
+          example: "Getting Started with ROS 2"
+        chunk_id:
+          type: string
+          description: Chunk identifier
+        score:
+          type: number
+          format: float
+          description: Relevance score (0-1)
+          example: 0.89
+
+    SessionListResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionSummary'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    SessionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        context_type:
+          type: string
+          enum: [general, selection, chapter]
+        message_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        last_message_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    SessionDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        context_type:
+          type: string
+        context_source:
+          type: string
+          nullable: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        created_at:
+          type: string
+          format: date-time
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        source_references:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceReference'
+        created_at:
+          type: string
+          format: date-time
+
+    TranslateRequest:
+      type: object
+      required: [content, source_path]
+      properties:
+        content:
+          type: string
+          maxLength: 50000
+          description: Markdown content to translate
+        source_path:
+          type: string
+          description: Source file path for caching
+          example: "module-1-ros2/basics.md"
+        target_language:
+          type: string
+          default: ur
+          enum: [ur]
+          description: Target language (currently only Urdu)
+
+    TranslateResponse:
+      type: object
+      properties:
+        translated_content:
+          type: string
+          description: Content translated to Urdu
+        source_path:
+          type: string
+        target_language:
+          type: string
+        cached:
+          type: boolean
+          description: Whether result was from cache
+        timestamp:
+          type: string
+          format: date-time
+
+    PersonalizeRequest:
+      type: object
+      required: [content, source_path, user_id]
+      properties:
+        content:
+          type: string
+          maxLength: 50000
+          description: Markdown content to personalize
+        source_path:
+          type: string
+          description: Source file path for caching
+        user_id:
+          type: string
+          format: uuid
+          description: User ID to fetch background from
+        software_background:
+          type: string
+          description: Override - user's software background
+        hardware_background:
+          type: string
+          description: Override - user's hardware background
+
+    PersonalizeResponse:
+      type: object
+      properties:
+        personalized_content:
+          type: string
+          description: Content adapted to user's background
+        source_path:
+          type: string
+        user_id:
+          type: string
+          format: uuid
+        cached:
+          type: boolean
+          description: Whether result was from cache
+        timestamp:
+          type: string
+          format: date-time
+
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          description: Search query
+        top_k:
+          type: integer
+          default: 5
+          maximum: 20
+          description: Number of results
+        score_threshold:
+          type: number
+          format: float
+          default: 0.7
+          description: Minimum similarity score
+        module:
+          type: string
+          enum: [ros2, gazebo, isaac_sim, vla]
+          description: Filter to specific module
+
+    SearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+
+    SearchResult:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Chunk content
+        source:
+          type: string
+          description: Source file path
+        section:
+          type: string
+          description: Section heading
+        module:
+          type: string
+          description: Module identifier
+        score:
+          type: number
+          format: float
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        qdrant_connected:
+          type: boolean
+        database_connected:
+          type: boolean
+        openai_available:
+          type: boolean
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

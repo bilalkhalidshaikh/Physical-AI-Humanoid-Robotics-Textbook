@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "updated_at": "2025-12-16T22:35:20.625647",
+  "files": {
+    "intro.md": {
+      "path": "intro.md",
+      "hash": "d10166a704c7815f44190c4fd5987067",
+      "last_modified": "2025-12-14T16:43:33.227402",
+      "chunk_count": 13,
+      "ingested_at": "2025-12-16T22:35:05.114711"
+    },
+    "module-1-ros2/index.md": {
+      "path": "module-1-ros2/index.md",
+      "hash": "54a0d70beb65828b09e9d8806eee37b4",
+      "last_modified": "2025-12-14T16:44:38.728959",
+      "chunk_count": 9,
+      "ingested_at": "2025-12-16T22:35:08.398498"
+    },
+    "module-2-digital-twin/index.md": {
+      "path": "module-2-digital-twin/index.md",
+      "hash": "ae5d928f252c029d713a634019999ff4",
+      "last_modified": "2025-12-14T16:44:46.054957",
+      "chunk_count": 9,
+      "ingested_at": "2025-12-16T22:35:15.896567"
+    },
+    "module-3-brain/index.md": {
+      "path": "module-3-brain/index.md",
+      "hash": "e55f50322333b431f01796fc00dde97c",
+      "last_modified": "2025-12-14T16:44:51.765286",
+      "chunk_count": 9,
+      "ingested_at": "2025-12-16T22:35:18.346393"
+    },
+    "module-4-vla/index.md": {
+      "path": "module-4-vla/index.md",
+      "hash": "6c4b88e63fb5686b4ca6b977728184aa",
+      "last_modified": "2025-12-14T16:44:57.766984",
+      "chunk_count": 9,
+      "ingested_at": "2025-12-16T22:35:20.625647"
+    }
+  }
+}

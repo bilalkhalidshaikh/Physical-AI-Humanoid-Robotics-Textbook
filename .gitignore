@@ -4,6 +4,7 @@ node_modules/
 # Build output
 build/
 .docusaurus/
+dist/
 
 # Environment files
 .env
@@ -19,6 +20,7 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+nul
 
 # Logs
 *.log
@@ -32,6 +34,31 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+.eggs/
+*.egg
+
+# Backend specific
+backend/venv/
+backend/.env
+
+# Auth server specific
+auth-server/node_modules/
+auth-server/.env
+
+# Qdrant
+qdrant_data/
 
 # Package manager locks (optional - uncomment if needed)
 # package-lock.json
