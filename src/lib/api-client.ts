@@ -6,7 +6,7 @@
  */
 
 // const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
-const backendUrl = "http://localhost:8000";
+const backendUrl = "https://bilalanjum-physical-ai-backend.hf.space";
 
 interface ChatRequest {
   message: string;

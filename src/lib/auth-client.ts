@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 
 // const authServerUrl = process.env.REACT_APP_AUTH_SERVER_URL || "http://localhost:3001";
-const authServerUrl = "http://localhost:3001";
+const authServerUrl = "https://bilalanjum-physical-ai-auth.hf.space";
 
 export const authClient = createAuthClient({
   baseURL: authServerUrl,
