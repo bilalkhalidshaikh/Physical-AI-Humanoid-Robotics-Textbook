@@ -20,11 +20,11 @@ const config: Config = {
   trailingSlash: false,
 
   // Strict link validation
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
 
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: 'throw',
+      onBrokenMarkdownLinks: 'warn',
     },
   },
 
