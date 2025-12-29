@@ -27,6 +27,7 @@ npx create-docusaurus@latest . classic --typescript
 ```
 
 **Note**: Since we already have a `docs/` folder with content, you may need to:
+
 1. Temporarily rename `docs/` to `docs-backup/`
 2. Run the Docusaurus init
 3. Move content back from `docs-backup/` to `docs/`
@@ -37,21 +38,21 @@ Edit `docusaurus.config.js`:
 
 ```javascript
 const config = {
-  title: 'Physical AI & Humanoid Robotics',
-  tagline: 'A comprehensive textbook on building intelligent humanoid robots',
-  favicon: 'img/favicon.ico',
+  title: "Physical AI & Humanoid Robotics",
+  tagline: "A comprehensive textbook on building intelligent humanoid robots",
+  favicon: "img/favicon.ico",
 
   // GitHub Pages configuration
-  url: 'https://<your-username>.github.io',
-  baseUrl: '/Physical-AI-Book/',
-  organizationName: '<your-username>',
-  projectName: 'Physical-AI-Book',
-  deploymentBranch: 'gh-pages',
+  url: "https://<your-username>.github.io",
+  baseUrl: "/Physical-AI-Book/",
+  organizationName: "<your-username>",
+  projectName: "Physical-AI-Book",
+  deploymentBranch: "gh-pages",
   trailingSlash: false,
 
   // Strict link checking
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'throw',
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "throw",
 
   // ... rest of config
 };
@@ -81,7 +82,7 @@ npm install
 npm run start
 ```
 
-The site should open at `http://localhost:3000/Physical-AI-Book/`
+The site should open at `https://bilalkhalidshaikh.github.io/Physical-AI-Book/`
 
 ### 6. Verify Content Structure
 
@@ -170,7 +171,6 @@ touch docs/module-1-ros2/02-nodes.md
 sidebar_position: 2
 title: Understanding ROS 2 Nodes
 ---
-
 # Understanding ROS 2 Nodes
 
 Your content here...

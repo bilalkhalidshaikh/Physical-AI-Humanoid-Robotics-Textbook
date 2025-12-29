@@ -55,7 +55,7 @@
 
 **Goal**: Readers can visit the landing page and see book overview with module navigation
 
-**Independent Test**: Visit http://localhost:3000/ and verify landing page displays with module links
+**Independent Test**: Visit https://bilalkhalidshaikh.github.io/ and verify landing page displays with module links
 
 ### Implementation for User Story 1
 
@@ -215,6 +215,7 @@ Task: "Configure sidebar auto-generation in sidebars.ts"
 **MVP = Phase 1 + Phase 2 + Phase 3 (User Story 1)**
 
 This delivers:
+
 - Functional Docusaurus site
 - Complete landing page with book overview
 - Navigation links to all modules (even if module content is placeholder)

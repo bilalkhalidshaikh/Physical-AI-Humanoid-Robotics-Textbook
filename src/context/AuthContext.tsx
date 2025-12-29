@@ -48,7 +48,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // const AUTH_SERVER_URL = process.env.REACT_APP_AUTH_SERVER_URL || "http://localhost:3001";
-const AUTH_SERVER_URL = "http://localhost:3001";
+const AUTH_SERVER_URL = "https://bilalanjum-physical-ai-auth.hf.space";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);

@@ -40,12 +40,14 @@ This guide helps developers quickly set up and run the feature locally.
 ### 4. OAuth Providers
 
 **GitHub:**
+
 1. Go to [github.com/settings/developers](https://github.com/settings/developers)
 2. Create new OAuth App
 3. Callback URL: `http://localhost:3001/api/auth/callback/github`
 4. Copy Client ID and Secret
 
 **Google:**
+
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
 2. Create OAuth 2.0 credentials
 3. Authorized redirect URI: `http://localhost:3001/api/auth/callback/google`
@@ -85,6 +87,7 @@ cd ..
 ### Step 2: Environment Files
 
 **auth-server/.env:**
+
 ```bash
 DATABASE_URL="postgresql://user:pass@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require"
 DATABASE_URL_POOLED="postgresql://user:pass@ep-xxx-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
@@ -94,10 +97,11 @@ GITHUB_CLIENT_ID="your-github-client-id"
 GITHUB_CLIENT_SECRET="your-github-client-secret"
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
-FRONTEND_URL="http://localhost:3000"
+FRONTEND_URL="https://bilalkhalidshaikh.github.io"
 ```
 
 **backend/.env:**
+
 ```bash
 DATABASE_URL="postgresql://user:pass@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require"
 OPENAI_API_KEY="sk-..."
@@ -132,12 +136,14 @@ cd ..
 ### Step 5: Start Services
 
 **Terminal 1 - Auth Server:**
+
 ```bash
 cd auth-server
 npm run dev  # Runs on port 3001
 ```
 
 **Terminal 2 - RAG Backend:**
+
 ```bash
 cd backend
 source venv/bin/activate
@@ -145,6 +151,7 @@ uvicorn main:app --reload --port 8000
 ```
 
 **Terminal 3 - Docusaurus:**
+
 ```bash
 npm start  # Runs on port 3000
 ```
@@ -166,7 +173,7 @@ npm start  # Runs on port 3000
 - [ ] `POST /search` returns document chunks
 - [ ] `POST /chat` returns AI response with sources
 
-### Frontend (http://localhost:3000)
+### Frontend (https://bilalkhalidshaikh.github.io)
 
 - [ ] Login/Signup button visible in navbar
 - [ ] Chat widget appears on pages
@@ -177,18 +184,22 @@ npm start  # Runs on port 3000
 ## Common Issues
 
 ### "Connection refused" on auth server
+
 - Check DATABASE_URL is correct
 - Ensure Neon project is not paused
 
 ### "Qdrant not connected"
+
 - Verify QDRANT_URL and QDRANT_API_KEY
 - Check cluster is running on cloud.qdrant.io
 
 ### "No documents found" in chat
+
 - Run `python scripts/ingest.py` first
 - Check docs/ folder has markdown files
 
 ### OAuth callback fails
+
 - Verify callback URLs match exactly in provider settings
 - Check GITHUB_CLIENT_ID/SECRET are correct
 

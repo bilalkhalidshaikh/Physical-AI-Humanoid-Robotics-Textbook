@@ -7,7 +7,7 @@ info:
     Built with Hono + BetterAuth.
 
 servers:
-  - url: http://localhost:3001
+  - url: https://bilalanjum-physical-ai-auth.hf.space
     description: Development
   - url: https://auth.yourdomain.com
     description: Production

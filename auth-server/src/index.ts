@@ -13,7 +13,7 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "https://bilalkhalidshaikh.github.io",
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
@@ -55,7 +55,11 @@ app.notFound((c) => {
 const port = parseInt(process.env.PORT || "3001", 10);
 
 console.log(`🚀 Auth server starting on port ${port}`);
-console.log(`📍 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
+console.log(
+  `📍 Frontend URL: ${
+    process.env.FRONTEND_URL || "https://bilalkhalidshaikh.github.io"
+  }`
+);
 
 serve({
   fetch: app.fetch,
