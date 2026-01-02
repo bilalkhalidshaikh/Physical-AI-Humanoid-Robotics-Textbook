@@ -6,6 +6,9 @@ const authServerUrl = "https://bilalanjum-physical-ai-auth.hf.space";
 export const authClient = createAuthClient({
   baseURL: authServerUrl,
   credentials: "include",
+  fetchOptions: {
+    withCredentials: true,
+  },
 });
 
 export const {

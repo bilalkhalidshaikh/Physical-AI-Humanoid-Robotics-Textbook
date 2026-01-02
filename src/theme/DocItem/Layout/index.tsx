@@ -18,6 +18,9 @@ export default function DocItemLayout(props: Props): JSX.Element {
   // Get the source file path for the toolbar
   const sourcePath = metadata.source?.replace(/^@site\//, "") || "";
 
+  // Store original content for fallback - initialize as null for SSR
+  const [originalContent, setOriginalContent] = useState<string | null>(null);
+
   // Capture the original content when the component mounts
   useEffect(() => {
     // Small delay to ensure DOM is ready
@@ -25,6 +28,7 @@ export default function DocItemLayout(props: Props): JSX.Element {
       const docContent = document.querySelector(".theme-doc-markdown");
       if (docContent instanceof HTMLElement) {
         setContentElement(docContent);
+        // Only set displayContent if not already set
         if (!displayContent) {
           setDisplayContent(docContent.innerHTML);
         }
@@ -33,9 +37,6 @@ export default function DocItemLayout(props: Props): JSX.Element {
 
     return () => clearTimeout(timer);
   }, [displayContent]);
-
-  // Store original content for fallback
-  const [originalContent, setOriginalContent] = useState<string | null>(null);
 
   // Capture original content once on mount
   useEffect(() => {
@@ -73,14 +74,26 @@ export default function DocItemLayout(props: Props): JSX.Element {
     }
   };
 
-  // Get original content for toolbar
-  const getOriginalContent = () => {
-    const docContent = document.querySelector(".theme-doc-markdown");
-    if (docContent instanceof HTMLElement) {
-      return docContent.innerHTML;
+  // Safe getter for toolbar content - only called after mount
+  const getContentForToolbar = () => {
+    // Return displayContent if we have it, otherwise return empty string for SSR
+    // The toolbar will handle the empty case gracefully
+    if (displayContent) {
+      return displayContent;
     }
+    // If we have originalContent from the effect, use it
+    if (originalContent) {
+      return originalContent;
+    }
+    // During SSR or before mount, return empty string
     return "";
   };
+
+  // Check if we're running in the browser
+  const [isBrowser, setIsBrowser] = useState(false);
+  useEffect(() => {
+    setIsBrowser(true);
+  }, []);
 
   return (
     <>
@@ -88,7 +101,7 @@ export default function DocItemLayout(props: Props): JSX.Element {
       <div style={{ marginBottom: "1rem" }}>
         <ChapterToolbar
           sourcePath={sourcePath}
-          content={displayContent || getOriginalContent()}
+          content={isBrowser ? getContentForToolbar() : ""}
           onContentChange={handleContentChange}
         />
       </div>
