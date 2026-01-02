@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   ReactNode,
+  useEffect
 } from "react";
 import { apiClient, type ChatMessage, type SourceReference } from "../lib/api-client";
 
@@ -42,12 +43,12 @@ interface ChatContextValue {
   setIsOpen: (open: boolean) => void;
 
   // Actions
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, userId?: string) => Promise<void>;
   clearMessages: () => void;
   startNewSession: () => void;
   loadSession: (sessionId: string) => Promise<void>;
-  deleteSession: (sessionId: string) => Promise<void>;
-  fetchSessions: () => Promise<void>;
+  deleteSession: (sessionId: string, userId: string) => Promise<void>;
+  fetchSessions: (userId: string) => Promise<void>;
 
   // Context actions
   setSelectionContext: (selection: SelectionContext | null) => void;
@@ -63,6 +64,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Context state
   const [contextType, setContextType] = useState<ContextType>("general");
@@ -71,8 +77,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Send a message
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim()) return;
+    async (content: string, userId?: string) => {
+      if (!content.trim() || typeof window === "undefined") return;
 
       setIsLoading(true);
       setError(null);
@@ -90,6 +96,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         const response = await apiClient.chat({
           message: content.trim(),
           session_id: currentSessionId || undefined,
+          user_id: userId,
           context_type: contextType,
           context_source: contextSource || undefined,
         });
@@ -138,6 +145,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Load an existing session
   const loadSession = useCallback(async (sessionId: string) => {
+    if (typeof window === "undefined") return;
     setIsLoading(true);
     setError(null);
 
@@ -158,9 +166,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Delete a session
   const deleteSession = useCallback(
-    async (sessionId: string) => {
+    async (sessionId: string, userId: string) => {
+      if (typeof window === "undefined") return;
       try {
-        await apiClient.deleteChatSession(sessionId);
+        await apiClient.deleteChatSession(sessionId, userId);
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));
 
         // If deleted current session, start fresh
@@ -176,9 +185,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   );
 
   // Fetch user's sessions
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (userId: string) => {
+    if (typeof window === "undefined") return;
     try {
-      const data = await apiClient.getChatSessions();
+      const data = await apiClient.getChatSessions(userId);
       setSessions(
         data.sessions.map((s: any) => ({
           id: s.id,
@@ -215,7 +225,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     messages,
     currentSessionId,
     sessions,
-    isLoading,
+    isLoading: isLoading || !isMounted,
     error,
     contextType,
     contextSource,

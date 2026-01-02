@@ -11,6 +11,7 @@ const backendUrl = "https://bilalanjum-physical-ai-backend.hf.space";
 interface ChatRequest {
   message: string;
   session_id?: string;
+  user_id?: string;
   context_type?: "general" | "selection" | "chapter";
   context_source?: string;
 }
@@ -160,8 +161,8 @@ class ApiClient {
   /**
    * Get chat sessions for authenticated user
    */
-  async getChatSessions(): Promise<{ sessions: any[]; total: number }> {
-    return this.request("/chat/sessions");
+  async getChatSessions(userId: string): Promise<{ sessions: any[]; total: number }> {
+    return this.request(`/chat/sessions?user_id=${userId}`);
   }
 
   /**
@@ -174,8 +175,8 @@ class ApiClient {
   /**
    * Delete a chat session
    */
-  async deleteChatSession(sessionId: string): Promise<{ success: boolean }> {
-    return this.request(`/chat/sessions/${sessionId}`, {
+  async deleteChatSession(sessionId: string, userId: string): Promise<{ success: boolean }> {
+    return this.request(`/chat/sessions/${sessionId}?user_id=${userId}`, {
       method: "DELETE",
     });
   }

@@ -17,8 +17,10 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: [
-    process.env.FRONTEND_URL || "https://bilalkhalidshaikh.github.io",
-  ],
+    "http://localhost:3000",
+    "https://bilalkhalidshaikh.github.io",
+    process.env.FRONTEND_URL || "",
+  ].filter(Boolean),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -51,6 +53,11 @@ export const auth = betterAuth({
   },
   advanced: {
     generateId: false, // Use database-generated UUIDs
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      partitioned: true,
+    },
   },
 });
 

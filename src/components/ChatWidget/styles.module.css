@@ -180,10 +180,15 @@
   font-size: 0.85rem;
 }
 
+.historyItemWrapper {
+  display: flex;
+  align-items: stretch;
+}
+
 .historyItem {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  flex: 1;
   padding: 10px 12px;
   background: none;
   border: none;
@@ -194,6 +199,21 @@
 
 .historyItem:hover {
   background: var(--ifm-color-emphasis-100);
+}
+
+.historyDelete {
+  background: none;
+  border: none;
+  padding: 0 12px;
+  cursor: pointer;
+  color: var(--ifm-color-emphasis-500);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.historyDelete:hover {
+  color: var(--ifm-color-danger);
 }
 
 .historyTitle {

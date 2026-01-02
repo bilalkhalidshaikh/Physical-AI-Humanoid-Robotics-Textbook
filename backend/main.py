@@ -14,6 +14,8 @@ from models.chat import (
     ChatResponse,
     SearchRequest,
     SearchResponse,
+    ChatSessionResponse,
+    ChatSessionListResponse,
 )
 
 load_dotenv()
@@ -79,17 +81,65 @@ async def chat(request: ChatRequest):
     2. Retrieves relevant documents from Qdrant
     3. Generates a response using OpenAI
     4. Returns the response with source references
+    5. Persists session and messages for authenticated users
     """
     # Import here to avoid circular imports
     from rag_service import query_rag
+    from db.connection import (
+        create_chat_session,
+        save_chat_message,
+        get_chat_session_with_messages
+    )
+
+    # 1. Provide conversation history if session exists
+    history = []
+    if request.session_id:
+        session_data = await get_chat_session_with_messages(request.session_id)
+        if session_data:
+            history = session_data["messages"]
 
     try:
+        # 2. Query RAG pipeline
         response = await query_rag(
             message=request.message,
             session_id=request.session_id,
             context_type=request.context_type,
             context_source=request.context_source,
+            conversation_history=history
         )
+
+        # 3. Persist messages for authenticated users
+        if request.user_id:
+            try:
+                # Ensure session exists
+                await create_chat_session(
+                    session_id=response.session_id,
+                    user_id=request.user_id,
+                    context_type=request.context_type,
+                    context_source=request.context_source
+                )
+
+                # Save user message
+                from uuid import uuid4
+                await save_chat_message(
+                    message_id=str(uuid4()),
+                    session_id=response.session_id,
+                    role="user",
+                    content=request.message
+                )
+
+                # Save assistant response
+                await save_chat_message(
+                    message_id=response.message.id or str(uuid4()),
+                    session_id=response.session_id,
+                    role="assistant",
+                    content=response.message.content,
+                    source_references=response.message.source_references
+                )
+            except Exception as db_err:
+                print(f"⚠️ Failed to persist chat: {db_err}")
+                # Don't fail the request if persistence fails
+
         return response
     except Exception as e:
         raise HTTPException(
@@ -178,6 +228,62 @@ async def personalize(
         raise HTTPException(
             status_code=500,
             detail=f"Personalization failed: {str(e)}"
+        )
+
+
+@app.get("/chat/sessions", response_model=ChatSessionListResponse)
+async def list_chat_sessions(user_id: str):
+    """List all chat sessions for a user."""
+    from db.connection import get_user_chat_sessions
+
+    try:
+        sessions = await get_user_chat_sessions(user_id)
+        return ChatSessionListResponse(
+            sessions=sessions,
+            total=len(sessions)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch sessions: {str(e)}"
+        )
+
+
+@app.get("/chat/sessions/{session_id}", response_model=ChatSessionResponse)
+async def get_chat_session(session_id: str):
+    """Get chat session details and message history."""
+    from db.connection import get_chat_session_with_messages
+
+    try:
+        data = await get_chat_session_with_messages(session_id)
+        if not data:
+            raise HTTPException(status_code=404, detail="Session not found")
+        return data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch session: {str(e)}"
+        )
+
+
+@app.delete("/chat/sessions/{session_id}")
+async def delete_chat_session_endpoint(session_id: str, user_id: str):
+    """Delete a chat session."""
+    from db.connection import delete_chat_session
+
+    try:
+        success = await delete_chat_session(session_id, user_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Session not found or not owned by user")
+        return {"status": "deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete session: {str(e)}"
         )
 
 

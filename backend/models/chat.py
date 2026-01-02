@@ -58,6 +58,10 @@ class ChatRequest(BaseModel):
         None,
         description="Existing session ID to continue conversation"
     )
+    user_id: Optional[str] = Field(
+        None,
+        description="Authenticated user ID to persist chat history"
+    )
     context_type: ContextType = Field(
         default=ContextType.GENERAL,
         description="Type of context for the query"

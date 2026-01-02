@@ -56,13 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const user = session?.user ?? null;
   const isAuthenticated = !!user;
 
   // Fetch user profile from auth server
   const fetchProfile = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || typeof window === "undefined") {
       setProfile(null);
       return;
     }
@@ -91,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh session from auth server
   const refreshSession = useCallback(async () => {
+    if (typeof window === "undefined") return;
     setIsLoading(true);
     try {
       const currentSession = await getCurrentSession();
@@ -112,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout
   const logout = useCallback(async () => {
+    if (typeof window === "undefined") return;
     try {
       await authLogout();
       setSession(null);
@@ -124,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Update profile
   const updateProfile = useCallback(
     async (data: Partial<UserProfile>) => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || typeof window === "undefined") return;
 
       try {
         const response = await fetch(`${AUTH_SERVER_URL}/api/user/profile`, {
@@ -152,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Complete onboarding
   const completeOnboarding = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || typeof window === "undefined") return;
 
     try {
       const response = await fetch(
@@ -175,21 +182,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check session on mount
   useEffect(() => {
-    refreshSession();
-  }, [refreshSession]);
+    if (isMounted) {
+      refreshSession();
+    }
+  }, [isMounted, refreshSession]);
 
   // Trigger onboarding for new users
   useEffect(() => {
-    if (isAuthenticated && profile && !profile.onboardingCompleted) {
+    if (isMounted && isAuthenticated && profile && !profile.onboardingCompleted) {
       setShowOnboarding(true);
     }
-  }, [isAuthenticated, profile]);
+  }, [isMounted, isAuthenticated, profile]);
 
   const value: AuthContextValue = {
     user,
     session,
     profile,
-    isLoading,
+    isLoading: isLoading || !isMounted,
     isAuthenticated,
     refreshSession,
     logout,
@@ -202,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowOnboarding,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={children ? value : value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

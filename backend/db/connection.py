@@ -187,3 +187,137 @@ async def set_personalization_cache(
             personalized_content,
             model_version,
         )
+
+
+# --- Chat Sessions & Messages ---
+
+async def create_chat_session(
+    session_id: str,
+    user_id: Optional[str] = None,
+    title: Optional[str] = None,
+    context_type: str = "general",
+    context_source: Optional[str] = None,
+) -> None:
+    """Create a new chat session."""
+    async with get_connection() as conn:
+        await conn.execute(
+            """
+            INSERT INTO chat_sessions
+                (id, user_id, title, context_type, context_source, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            ON CONFLICT (id) DO NOTHING
+            """,
+            session_id,
+            user_id,
+            title,
+            context_type,
+            context_source,
+        )
+
+
+async def update_chat_session_timestamp(session_id: str) -> None:
+    """Update the updated_at timestamp for a session."""
+    async with get_connection() as conn:
+        await conn.execute(
+            "UPDATE chat_sessions SET updated_at = NOW() WHERE id = $1",
+            session_id,
+        )
+
+
+async def save_chat_message(
+    message_id: str,
+    session_id: str,
+    role: str,
+    content: str,
+    source_references: Optional[List[dict]] = None,
+) -> None:
+    """Save a chat message to the database."""
+    import json
+    async with get_connection() as conn:
+        # Convert source references to JSON string for storage
+        refs_json = json.dumps([ref.dict() if hasattr(ref, "dict") else ref for ref in (source_references or [])])
+
+        await conn.execute(
+            """
+            INSERT INTO chat_messages
+                (id, session_id, role, content, source_references, created_at)
+            VALUES ($1, $2, $3, $4, $5, NOW())
+            """,
+            message_id,
+            session_id,
+            role,
+            content,
+            refs_json,
+        )
+
+        # After saving a message, update the session timestamp
+        await update_chat_session_timestamp(session_id)
+
+
+async def get_user_chat_sessions(user_id: str) -> List[dict]:
+    """Get all chat sessions for a user."""
+    async with get_connection() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT
+                id, user_id, title, context_type, context_source,
+                created_at, updated_at
+            FROM chat_sessions
+            WHERE user_id = $1
+            ORDER BY updated_at DESC
+            """,
+            user_id,
+        )
+        return [dict(row) for row in rows]
+
+
+async def get_chat_session_with_messages(session_id: str) -> Optional[dict]:
+    """Get session details and all its messages."""
+    import json
+    async with get_connection() as conn:
+        # 1. Fetch session
+        session_row = await conn.fetchrow(
+            "SELECT * FROM chat_sessions WHERE id = $1",
+            session_id,
+        )
+
+        if not session_row:
+            return None
+
+        # 2. Fetch messages
+        message_rows = await conn.fetch(
+            """
+            SELECT id, role, content, source_references, created_at
+            FROM chat_messages
+            WHERE session_id = $1
+            ORDER BY created_at ASC
+            """,
+            session_id,
+        )
+
+        # Parse JSON source references
+        messages = []
+        for row in message_rows:
+            msg = dict(row)
+            if msg["source_references"]:
+                msg["source_references"] = json.loads(msg["source_references"])
+            else:
+                msg["source_references"] = []
+            messages.append(msg)
+
+        return {
+            "session": dict(session_row),
+            "messages": messages
+        }
+
+
+async def delete_chat_session(session_id: str, user_id: str) -> bool:
+    """Delete a chat session and its messages (cascades)."""
+    async with get_connection() as conn:
+        result = await conn.execute(
+            "DELETE FROM chat_sessions WHERE id = $1 AND user_id = $2",
+            session_id,
+            user_id,
+        )
+        # result is like 'DELETE 1'
+        return result.startswith("DELETE") and result.split(" ")[1] != "0"
